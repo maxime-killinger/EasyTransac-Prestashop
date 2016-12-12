@@ -15,6 +15,7 @@
  *        NEW - Checks total price paid and cart total and errors if they don't match.
  *        NEW - HTTPS ONLY : Validation/Notification lock to not double orders.
  * v1.9 - UPD - cURL fallback.
+ * v1.91 - NEW - OneClick.
  */
 class EasyTransacApi
 {
@@ -174,6 +175,14 @@ class EasyTransacApi
 		else
 			$ipaddress	 = 'UNKNOWN';
 		return $ipaddress;
+	}
+	
+	function get_server_info_string()
+	{
+		$curl_info_string	 = function_exists('curl_version') ? 'enabled' : 'not found';
+		$openssl_info_string = OPENSSL_VERSION_NUMBER >= 0x10001000 ? 'TLSv1.2' : 'OpenSSL version deprecated';
+		$https_info_string = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'S' : '';
+		return sprintf('Prestashop 1.91 [cURL %s, OpenSSL %s, HTTP%s]', $curl_info_string, $openssl_info_string, $https_info_string);
 	}
 
 }
