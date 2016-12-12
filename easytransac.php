@@ -14,7 +14,7 @@ class EasyTransac extends PaymentModule
 	{
 		$this->name			 = 'easytransac';
 		$this->tab			 = 'payments_gateways';
-		$this->version			 = '1.7';
+		$this->version			 = '1.91';
 		$this->author			 = 'EasyTransac';
 		$this->is_eu_compatible		 = 1;
 		$this->need_instance		 = 0;
@@ -39,6 +39,7 @@ class EasyTransac extends PaymentModule
 		include_once(_PS_MODULE_DIR_ . $this->name . '/easytransac_install.php');
 		$easytransac_install = new EasyTransacInstall();
 		$easytransac_install->updateConfiguration();
+		$easytransac_install->createTables();
 		$this->create_et_order_state();
 		return true;
 	}
