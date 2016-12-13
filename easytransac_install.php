@@ -34,7 +34,7 @@ class EasyTransacInstall
         if (!Db::getInstance()->Execute('
 		CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'easytransac_customer` (
 			`id_customer` int(10) unsigned NOT NULL,
-			`client_id` int(10) unsigned NOT NULL,
+			`client_id` VARCHAR(16) NOT NULL,
 			PRIMARY KEY (`id_customer`)
 		) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;
 			ALTER TABLE `'._DB_PREFIX_.'easytransac_customer` ADD KEY `easytransac_client_id` (`client_id`);')) {

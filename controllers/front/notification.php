@@ -11,15 +11,25 @@ class EasyTransacNotificationModuleFrontController extends ModuleFrontController
 	 */
 	public function postProcess()
 	{
+//		$c = get
+//		echo $c->getClient_id();
+//		$c->id = $this->context->customer->id;
+//		$this->context->customer->setClient_id(666);
+//		echo $this->context->customer->getClient_id();
+//		echo get_class($this->context->customer);
+//		$found = $c->getByClientId(666);
+//		var_dump($found);
+//		die('hhh');
 		include_once(_PS_MODULE_DIR_ . 'easytransac/api.php');
 
-		$debug = 0;
+		$debug = 1;
 		$dump_path = __DIR__ . '/dump';
 		
 		if($debug)
 		{
 			$debug_string = 'Start Notification ' . date('c');
 			file_put_contents($dump_path, "\n\n" .$debug_string, FILE_APPEND);
+			file_put_contents($dump_path, "\n\n" .print_r($_POST, true), FILE_APPEND);
 		}
 
 		$api	 = new EasyTransacApi();
@@ -130,6 +140,7 @@ class EasyTransacNotificationModuleFrontController extends ModuleFrontController
 		{
 			case 'captured':
 				$payment_status = 2;
+				$customer->setClient_id($data['Client']['Id']);
 				break;
 
 			case 'pending':
