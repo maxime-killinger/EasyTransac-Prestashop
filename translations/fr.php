@@ -43,7 +43,7 @@ $_MODULE['<{easytransac}prestashop>checkout_payment_e1e36dcc9f95c96ee5f5ae0ba4a4
 $_MODULE['<{easytransac}prestashop>confirmation_2e2117b7c81aa9ea6931641ea2c6499f'] = 'Votre commande sur';
 $_MODULE['<{easytransac}prestashop>confirmation_75fbf512d744977d62599cc3f0ae2bb4'] = 'est confirmée.';
 $_MODULE['<{easytransac}prestashop>confirmation_a6aabc30a978bcfbafa419244fd01608'] = 'Vous avez choisi le mode de paiement EasyTransac.';
-$_MODULE['<{easytransac}prestashop>confirmation_e6dc7945b557a1cd949bea92dd58963e'] = 'Votre commande va être livrée bientôt.';
+$_MODULE['<{easytransac}prestashop>confirmation_e6dc7945b557a1cd949bea92dd58963e'] = 'Votre commande sera livrée bientôt.';
 $_MODULE['<{easytransac}prestashop>confirmation_0db71da7150c27142eef9d22b843b4a9'] = 'Pour toute demande d\'information, merci de contacter notre';
 $_MODULE['<{easytransac}prestashop>confirmation_64430ad2835be8ad60c59e7d44e4b0b1'] = 'service client';
 

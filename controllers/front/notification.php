@@ -22,7 +22,7 @@ class EasyTransacNotificationModuleFrontController extends ModuleFrontController
 //		die('hhh');
 		include_once(_PS_MODULE_DIR_ . 'easytransac/api.php');
 
-		$debug = 1;
+		$debug = 0;
 		$dump_path = __DIR__ . '/dump';
 		
 		if($debug)

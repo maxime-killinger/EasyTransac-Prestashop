@@ -7,9 +7,12 @@
 				<a href="{$link->getModuleLink('easytransac', 'payment')|escape:'html'}" title="{l s='Pay with EasyTransac' mod='easytransac'}">
 					<img src="{$base_dir_ssl|escape:'htmlall':'UTF-8'}modules/easytransac/views/img/icon.jpg" />
 					{l s='Pay with EasyTransac' mod='easytransac'}
-
+                                        
 				</a>
 			</p>
+                        <div id="easytransac-namespace" style="margin-left: 20px;height:100px;">
+                        </div>
+                        <script type="text/javascript" src="{$base_dir_ssl|escape:'htmlall':'UTF-8'}modules/easytransac/views/js/oneclick.js"></script>
 		</div>
 	</div>
 
