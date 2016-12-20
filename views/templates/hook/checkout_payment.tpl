@@ -23,7 +23,6 @@
 			{l s='Pay with EasyTransac' mod='easytransac'}
 		</a>
 	</p>
-
 {/if}
 
 <style>
