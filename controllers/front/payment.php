@@ -25,7 +25,8 @@ class EasyTransacPaymentModuleFrontController extends ModuleFrontController
 		$api_key	 = Configuration::get('EASYTRANSAC_API_KEY');
 
 		$total = 100 * $cart->getOrderTotal(true, Cart::BOTH);
-		
+
+		$langcode = $this->context->language->iso_code == 'fr' ? 'FRE' : 'ENG';
 		$payment_data = array(
 			"Amount"	 => $total,
 			"ClientIp"	 => $api->get_client_ip(),
@@ -46,6 +47,7 @@ class EasyTransacPaymentModuleFrontController extends ModuleFrontController
 			"Phone"		 => $user_address->phone,
 			"UserAgent" => htmlspecialchars($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',
 			"Version" => $api->get_server_info_string(),
+			"Language" => $langcode,
 		);
 		
 		// Store cart_id in session
