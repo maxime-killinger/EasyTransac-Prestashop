@@ -5,11 +5,16 @@
  */
 class EasyTransacSpinnerModuleFrontController extends ModuleFrontController
 {
-	public $display_column_left	 = false;
+
+	public $display_column_left = false;
 
 	public function initContent()
 	{
+		$this->module->loginit();
+		EasyTransac\Core\Logger::getInstance()->write('Start Spinner');
+		
 		parent::initContent();
+		EasyTransac\Core\Logger::getInstance()->write('Context cookie cart: ' . $this->context->cookie->cart_id);
 		$existing_order_id = OrderCore::getOrderByCartId($this->context->cookie->cart_id);
 
 		$existing_order = new Order($existing_order_id);
@@ -28,12 +33,10 @@ class EasyTransacSpinnerModuleFrontController extends ModuleFrontController
 
 	public function postProcess()
 	{
-
-
 		$this->context->smarty->assign(array(
-			'isPending'	 => 1,
-			'isCanceled'	 => 0,
-			'isAccepted'	 => 0,
+			'isPending' => 1,
+			'isCanceled' => 0,
+			'isAccepted' => 0,
 		));
 	}
 

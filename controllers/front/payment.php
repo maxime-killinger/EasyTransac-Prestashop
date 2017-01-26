@@ -6,8 +6,8 @@
 class EasyTransacPaymentModuleFrontController extends ModuleFrontController
 {
 
-	public $ssl			 = true;
-	public $display_column_left	 = false;
+	public $ssl = true;
+	public $display_column_left = false;
 
 	/**
 	 * @see FrontController::initContent()
@@ -15,70 +15,70 @@ class EasyTransacPaymentModuleFrontController extends ModuleFrontController
 	public function initContent()
 	{
 		parent::initContent();
-		
-		include_once(_PS_MODULE_DIR_ . 'easytransac/api.php');
-
-		$api		 = new EasyTransacApi();
-		$cart		 = $this->context->cart;
-		$customer	 = $this->context->customer;
-		$user_address	 = new Address(intval($cart->id_address_invoice));
-		$api_key	 = Configuration::get('EASYTRANSAC_API_KEY');
-
+		$cart = $this->context->cart;
+		$customer = $this->context->customer;
+		$user_address = new Address(intval($cart->id_address_invoice));
+		$api_key = Configuration::get('EASYTRANSAC_API_KEY');
 		$total = 100 * $cart->getOrderTotal(true, Cart::BOTH);
-
 		$langcode = $this->context->language->iso_code == 'fr' ? 'FRE' : 'ENG';
-		$payment_data = array(
-			"Amount"	 => $total,
-			"ClientIp"	 => $api->get_client_ip(),
-			"Email"		 => $customer->email,
-			"OrderId"	 => $this->context->cart->id,
-			"Uid"		 => $user_address->id_customer,
-			"ReturnUrl"	 => Tools::getShopDomainSsl(true, true) . __PS_BASE_URI__ . 'module/easytransac/validation',
-			"CancelUrl"	 => Tools::getShopDomainSsl(true, true) . __PS_BASE_URI__ . 'index.php?controller=order&step=3',
-			"3DS"		 => Configuration::get('EASYTRANSAC_3DSECURE') ? 'yes' : 'no',
-			"Firstname"	 => $customer->firstname,
-			"Lastname"	 => $customer->lastname,
-			"Address"	 => $user_address->address1 . ' - ' . $user_address->address2,
-			"ZipCode"	 => $user_address->postcode,
-			"City"		 => $user_address->city,
-			"BirthDate"	 => $customer->birthday == '0000-00-00' ? '' : $customer->birthday,
-			"Nationality"	 => "",
-			"CallingCode"	 => "",
-			"Phone"		 => $user_address->phone,
-			"UserAgent" => htmlspecialchars($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',
-			"Version" => $api->get_server_info_string(),
-			"Language" => $langcode,
-		);
+		$this->module->loginit();
+		EasyTransac\Core\Logger::getInstance()->write('Start Payment Page Request');
+		EasyTransac\Core\Services::getInstance()->provideAPIKey($api_key);
+
+		// SDK Payment Page
+		$customer_ET = (new EasyTransac\Entities\Customer())
+				->setEmail($customer->email)
+				->setUid($user_address->id_customer)
+				->setFirstname($customer->firstname)
+				->setLastname($customer->lastname)
+				->setAddress($user_address->address1 . ' - ' . $user_address->address2)
+				->setZipCode($user_address->postcode)
+				->setCity($user_address->city)
+				->setBirthDate($customer->birthday == '0000-00-00' ? '' : $customer->birthday)
+				->setNationality('')
+				->setCallingCode('')
+				->setPhone($user_address->phone);
+
+		$transaction = (new EasyTransac\Entities\PaymentPageTransaction())
+				->setAmount($total)
+				->setCustomer($customer_ET)
+				->setOrderId($this->context->cart->id)
+				->setReturnUrl(Tools::getShopDomainSsl(true, true) . __PS_BASE_URI__ . 'module/easytransac/validation')
+				->setCancelUrl(Tools::getShopDomainSsl(true, true) . __PS_BASE_URI__ . 'index.php?controller=order&step=3')
+				->setSecure(Configuration::get('EASYTRANSAC_3DSECURE') ? 'yes' : 'no')
+				->setVersion($this->module->get_server_info_string())
+				->setLanguage($langcode);
+
+		$request = new EasyTransac\Requests\PaymentPage();
+
+		/* @var  $response \EasyTransac\Entities\PaymentPageInfos */
+		try
+		{
+			$response = $request->execute($transaction);
+		}
+		catch (Exception $exc)
+		{
+			EasyTransac\Core\Logger::getInstance()->write('Payment Exception: ' . $exc->getMessage());
+		}
+
 		
+		if(!$response->isSuccess())
+		{
+			EasyTransac\Core\Logger::getInstance()->write('Payment Page Request error: ' . $response->getErrorCode() . ' - ' . $response->getErrorMessage());
+		}
+
 		// Store cart_id in session
 		$this->context->cookie->cart_id = $this->context->cart->id;
-                
+
 		$this->context->cookie->order_total = $cart->getOrderTotal(true, Cart::BOTH);
 
-		$payment_page = $api->easytransac_payment_page($payment_data, $api_key);
-
 		$this->context->smarty->assign(array(
-			'nbProducts'	 => $cart->nbProducts(),
-			'total'		 => $cart->getOrderTotal(true, Cart::BOTH),
-			'payment_page'	 => $payment_page,
-			'payment_data'	 => $payment_data,
+			'nbProducts' => $cart->nbProducts(),
+			'total' => $cart->getOrderTotal(true, Cart::BOTH),
+			'payment_page_url' => $response->isSuccess() ? $response->getContent()->getPageUrl() : false,
 		));
-		
-		// Duplicate from  create_et_order_state()
-		// for sites upgrading from older version
-		if(!(Configuration::get('EASYTRANSAC_ID_ORDER_STATE') > 0)) 
-		{
-			$OrderState = new OrderState();
-			$OrderState->id = EASYTRANSAC_STATE_ID;
-			$OrderState->name = array_fill(0,10,"EasyTransac payment pending");
-			$OrderState->send_email = 0;
-			$OrderState->invoice = 0;
-			$OrderState->color = "#ff9900";
-			$OrderState->unremovable = false;
-			$OrderState->logable = 0;
-			$OrderState->add();
-			Configuration::updateValue('EASYTRANSAC_ID_ORDER_STATE', $OrderState->id);
-		}
+
+		$this->module->create_easytransac_order_state();
 		
 		$this->setTemplate('payment_execution.tpl');
 	}

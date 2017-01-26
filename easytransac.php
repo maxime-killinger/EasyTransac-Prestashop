@@ -1,5 +1,7 @@
 <?php
 
+require __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+
 /*
  * EasyTransac's official payment method Prestashop module.
  */
@@ -14,7 +16,7 @@ class EasyTransac extends PaymentModule
 	{
 		$this->name = 'easytransac';
 		$this->tab = 'payments_gateways';
-		$this->version = '1.91';
+		$this->version = '2.0';
 		$this->author = 'EasyTransac';
 		$this->is_eu_compatible = 1;
 		$this->need_instance = 0;
@@ -31,7 +33,17 @@ class EasyTransac extends PaymentModule
 		if (!Configuration::get('EASYTRANSAC_API_KEY'))
 			$this->warning = $this->l('No API key provided');
 	}
+	
+	public function loginit()
+	{
+		EasyTransac\Core\Logger::getInstance()->setActive(Configuration::get('EASYTRANSAC_DEBUG'));
+		EasyTransac\Core\Logger::getInstance()->setFilePath(_PS_ROOT_DIR_ . '/modules/easytransac/logs/');
+	}
 
+	/**
+	 * Module install.
+	 * @return boolean
+	 */
 	public function install()
 	{
 		if (!parent::install() || !$this->registerHook('payment') || !$this->registerHook('paymentReturn'))
@@ -40,10 +52,14 @@ class EasyTransac extends PaymentModule
 		$easytransac_install = new EasyTransacInstall();
 		$easytransac_install->updateConfiguration();
 		$easytransac_install->createTables();
-		$this->create_et_order_state();
+		$this->create_easytransac_order_state();
 		return true;
 	}
 
+	/**
+	 * Module uninstall.
+	 * @return boolean
+	 */
 	public function uninstall()
 	{
 		if (!parent::uninstall())
@@ -77,6 +93,18 @@ class EasyTransac extends PaymentModule
 			else
 			{
 				Configuration::updateValue('EASYTRANSAC_3DSECURE', 1);
+			}
+			
+			$enable_debug = strval(Tools::getValue('EASYTRANSAC_DEBUG'));
+			if (empty($enable_debug))
+			{
+				Configuration::updateValue('EASYTRANSAC_DEBUG', 0);
+				$this->loginit();
+				EasyTransac\Core\Logger::getInstance()->delete();
+			}
+			else
+			{
+				Configuration::updateValue('EASYTRANSAC_DEBUG', 1);
 			}
 			$output .= $this->displayConfirmation($this->l('Settings updated'));
 		}
@@ -142,6 +170,25 @@ class EasyTransac extends PaymentModule
 					),
 				),
 				array(
+					'type' => 'radio',
+					'label' => 'Debug Mode',
+					'name' => 'EASYTRANSAC_DEBUG',
+					'size' => 20,
+					'is_bool' => true,
+					'values' => array(// $values contains the data itself.
+						array(
+							'id' => 'active2_on', // The content of the 'id' attribute of the <input> tag, and of the 'for' attribute for the <label> tag.
+							'value' => 1, // The content of the 'value' attribute of the <input> tag.   
+							'label' => $this->l('Enabled')   // The <label> for this radio button.
+						),
+						array(
+							'id' => 'active2_off',
+							'value' => 0,
+							'label' => $this->l('Disabled')
+						)
+					),
+				),
+				array(
 					'type' => 'free',
 					'label' => $this->l('Configuration'),
 					'desc' => $this->l('Create an application configuration and copy paste your API key in the next input.'),
@@ -191,7 +238,7 @@ class EasyTransac extends PaymentModule
 		// Title and toolbar
 		$helper->title = $this->displayName;
 		$helper->show_toolbar = true; // false -> remove toolbar
-		$helper->toolbar_scroll = true;	  // yes - > Toolbar is always visible on the top of the screen.
+		$helper->toolbar_scroll = true;   // yes - > Toolbar is always visible on the top of the screen.
 		$helper->submit_action = 'submit' . $this->name;
 		$helper->toolbar_btn = array(
 			'save' =>
@@ -207,6 +254,7 @@ class EasyTransac extends PaymentModule
 		);
 
 		// Load current value
+		$helper->fields_value['EASYTRANSAC_DEBUG'] = Configuration::get('EASYTRANSAC_DEBUG');
 		$helper->fields_value['EASYTRANSAC_API_KEY'] = Configuration::get('EASYTRANSAC_API_KEY');
 		$helper->fields_value['EASYTRANSAC_3DSECURE'] = Configuration::get('EASYTRANSAC_3DSECURE');
 		$helper->fields_value['EASYTRANSAC_NOTIFICATION_URL'] = Tools::getShopDomainSsl(true, true) . __PS_BASE_URI__ . 'module/easytransac/notification';
@@ -248,24 +296,6 @@ class EasyTransac extends PaymentModule
 		return $this->display(__FILE__, $name);
 	}
 
-	// Creates state if missing.
-	public function create_et_order_state()
-	{
-		if (!(Configuration::get('EASYTRANSAC_ID_ORDER_STATE') > 0))
-		{
-			$OrderState = new OrderState();
-			$OrderState->id = EASYTRANSAC_STATE_ID;
-			$OrderState->name = array_fill(0, 10, "EasyTransac payment pending");
-			$OrderState->send_email = 0;
-			$OrderState->invoice = 0;
-			$OrderState->color = "#ff9900";
-			$OrderState->unremovable = false;
-			$OrderState->logable = 0;
-			$OrderState->add();
-			Configuration::updateValue('EASYTRANSAC_ID_ORDER_STATE', $OrderState->id);
-		}
-	}
-
 	/**
 	 * Return from EasyTransac and validation.
 	 */
@@ -274,14 +304,14 @@ class EasyTransac extends PaymentModule
 		if (!$this->active)
 			return null;
 
-		$this->create_et_order_state();
+		$this->create_easytransac_order_state();
 		$et_pending = (int) Configuration::get('EASYTRANSAC_ID_ORDER_STATE');
 
 		$existing_order = !empty($_GET['id_order']) ? new Order($_GET['id_order']) : null;
 
-		if (empty($existing_order->id) || empty($existing_order->current_state) || $this->isLocked($existing_order_id))
+		if (empty($existing_order->id) || empty($existing_order->current_state) || $this->isLocked($existing_order->id))
 			$existing_order->current_state = $et_pending;
-		
+
 		// 2: payment accepted, 6: canceled, 7: refunded, 8: payment error, 12: remote payment accepted
 		$this->context->smarty->assign(array(
 			'isPending' => (int) $existing_order->current_state === $et_pending,
@@ -306,6 +336,10 @@ class EasyTransac extends PaymentModule
 		}
 	}
 
+	/**
+	 * Locks an order.
+	 * @param in $id
+	 */
 	public function lock($id)
 	{
 		$path = __DIR__ . '/EasyTransac-Processing-' . $id;
@@ -314,17 +348,60 @@ class EasyTransac extends PaymentModule
 			touch($path);
 	}
 
+	/**
+	 * Check if an order is locked.
+	 * @param int $id
+	 * @return bool
+	 */
 	public function isLocked($id)
 	{
 		$path = __DIR__ . '/EasyTransac-Processing-' . $id;
 		return file_exists($path);
 	}
 
+	/**
+	 * Unlocks an order.
+	 * @param int $id
+	 */
 	public function unlock($id)
 	{
 		$path = __DIR__ . '/EasyTransac-Processing-' . $id;
 		if (file_exists($path) && is_writable(__DIR__))
 			unlink($path);
+	}
+
+	/**
+	 * Plugin version info.
+	 * @return string
+	 */
+	public function get_server_info_string()
+	{
+		$curl_info_string = function_exists('curl_version') ? 'enabled' : 'not found';
+		$openssl_info_string = OPENSSL_VERSION_NUMBER >= 0x10001000 ? 'TLSv1.2' : 'OpenSSL version deprecated';
+		$https_info_string = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'S' : '';
+		return sprintf('Prestashop %s [cURL %s, OpenSSL %s, HTTP%s]', $this->version, $curl_info_string, $openssl_info_string, $https_info_string);
+	}
+
+	/**
+	 * Creates EasyTransac order state if not already registered.
+	 * Prupose : plugin update from older versions.
+	 */
+	public function create_easytransac_order_state()
+	{
+		if (!(Configuration::get('EASYTRANSAC_ID_ORDER_STATE') > 0))
+		{
+			// for sites upgrading from older version
+			$OrderState = new OrderState();
+			$OrderState->id = EASYTRANSAC_STATE_ID;
+			$OrderState->name = array_fill(0, 10, "EasyTransac payment pending");
+			$OrderState->send_email = 0;
+			$OrderState->invoice = 0;
+			$OrderState->color = "#ff9900";
+			$OrderState->unremovable = false;
+			$OrderState->logable = 0;
+			$OrderState->add();
+			Configuration::updateValue('EASYTRANSAC_ID_ORDER_STATE', $OrderState->id);
+		}
 	}
 
 }

@@ -11,18 +11,12 @@
 
 {if $nbProducts <= 0}
 	<p class="warning">{l s='Your shopping cart is empty.' mod='easytransac'}</p>
-{elseif $payment_page}
+{elseif $payment_page_url}
 
 	<div class="box cheque-box">
 
 		<h3 class="page-subheading">EasyTransac</h3>
-		<form action="{$payment_page.Result.PageUrl}" method="post" id="easytransac_payment_form">
-
-			<!-- Gateway data -->
-			{foreach from=$payment_data key=k item=v}
-				<input name="{$k}" value="{$v}" type="hidden"/>
-			{/foreach}
-			<!-- /Gateway data -->
+		<form action="{$payment_page_url}" method="get" id="easytransac_payment_form">
 			<img src="{$base_dir_ssl}modules/easytransac/views/img/icon.jpg" alt="{l s='EasyTransac' mod='easytransac'}" height="49" style="float:left; margin: 0px 10px 5px 0px;" />
 			<div style="margin-left: 120px;">
 				<p>

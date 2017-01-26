@@ -11,31 +11,31 @@ class EasyTransacListcardsModuleFrontController extends ModuleFrontController
 	 */
 	public function postProcess()
 	{
-		if(!$this->context->customer->id) die;
-		include_once(_PS_MODULE_DIR_ . 'easytransac/api.php');
-		$easytransac_api	 = new EasyTransacApi();
-		$output = array('status' => 0);
-		$api_key = Configuration::get('EASYTRANSAC_API_KEY');
-		$client_id = $this->context->customer->getClient_id();
-		if (!empty($api_key) && !empty($client_id)) {
-		  $data = array(
-			"ClientId" => $client_id,
-		  );
-		  $easytransac_api = new EasytransacApi();
-		  $response = $easytransac_api->setServiceListCards()->communicate($api_key, $data);
+		if (!$this->context->customer->id)
+			die;
+		$this->module->loginit();
+		EasyTransac\Core\Services::getInstance()->provideAPIKey(Configuration::get('EASYTRANSAC_API_KEY'));
+		$customer = (new EasyTransac\Entities\Customer())->setClientId($this->context->customer->getClient_id());
+		$request = new EasyTransac\Requests\CreditCardsList();
+		$response = $request->execute($customer);
 
-		  if (!empty($response['Result'])) {
+		if ($response->isSuccess())
+		{
 			$buffer = array();
-			foreach ($response['Result'] as $row)
+			foreach ($response->getContent()->getCreditCards() as $cc)
 			{
-			  $buffer[] = array_intersect_key($row, array('Alias' => 1, 'CardNumber' => 1));
+				/* @var $cc EasyTransac\Entities\CreditCard */
+				$buffer[] = array('Alias' => $cc->getAlias(), 'CardNumber' => $cc->getNumber());
 			}
 			$output = array('status' => !empty($buffer), 'packet' => $buffer);
-		  }
+			echo json_encode($output);
+			die;
 		}
-		echo json_encode($output);
-		
-		die;
+		else
+		{
+			EasyTransac\Core\Logger::getInstance()->write('List Cards Error: ' . $response->getErrorCode() . ' - ' . $response->getErrorMessage());
+		}
+		echo json_encode(array('status' => 0));
 	}
 
 }

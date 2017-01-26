@@ -45,6 +45,20 @@ class Notification extends Entity
 	protected $signature = null;
 	/** @object:Client **/
 	protected $client = null;
+	/** @map:Error **/
+    protected $error = null;
+    /** @map:AdditionalError **/
+    protected $additionalError = null;
+	
+    public function getAdditionalError()
+    {
+        return $this->additionalError;
+    }
+	
+	public function getError()
+    {
+        return $this->error;
+    }
 	
 	public function getOperationType() 
 	{
