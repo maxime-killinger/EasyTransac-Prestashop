@@ -392,7 +392,7 @@ class EasyTransac extends PaymentModule
 		{
 			// for sites upgrading from older version
 			$OrderState = new OrderState();
-			$OrderState->id = EASYTRANSAC_STATE_ID;
+			$OrderState->id = 'EASYTRANSAC_STATE_ID';
 			$OrderState->name = array_fill(0, 10, "EasyTransac payment pending");
 			$OrderState->send_email = 0;
 			$OrderState->invoice = 0;
