@@ -14,8 +14,9 @@ class EasyTransacSpinnerModuleFrontController extends ModuleFrontController
 		EasyTransac\Core\Logger::getInstance()->write('Start Spinner');
 		
 		parent::initContent();
-		EasyTransac\Core\Logger::getInstance()->write('Context cookie cart: ' . $this->context->cookie->cart_id);
+		EasyTransac\Core\Logger::getInstance()->write('Spinner context cookie cart: ' . $this->context->cookie->cart_id);
 		$existing_order_id = OrderCore::getOrderByCartId($this->context->cookie->cart_id);
+		EasyTransac\Core\Logger::getInstance()->write('Spinner context order id: ' . $existing_order_id);
 
 		$existing_order = new Order($existing_order_id);
 

@@ -63,7 +63,10 @@ class EasyTransacNotificationModuleFrontController extends ModuleFrontController
 		$existing_order_id = OrderCore::getOrderByCartId($response->getOrderId());
 		$existing_order = new Order($existing_order_id);
 
+		EasyTransac\Core\Logger::getInstance()->write('Notification cart id : ' . $response->getOrderId());
+		EasyTransac\Core\Logger::getInstance()->write('Notification order id from cart : ' . $existing_order_id);
 		EasyTransac\Core\Logger::getInstance()->write('Notification customer : ' . $existing_order->id_customer);
+		EasyTransac\Core\Logger::getInstance()->write('Notification client ID : ' . $response->getClient()->getId());
 
 		$payment_status = null;
 
@@ -115,9 +118,9 @@ class EasyTransacNotificationModuleFrontController extends ModuleFrontController
 			$total_paid_float = (float) $paid_total;
 			EasyTransac\Core\Logger::getInstance()->write('Notification Total paid float: ' . $total_paid_float);
 			$this->module->validateOrder($cart->id, $payment_status, $total_paid_float, $this->module->displayName, $payment_message, $mailVars = array(), null, false, $customer->secure_key);
-			$this->module->unlock($response->getOrderId());
 			EasyTransac\Core\Logger::getInstance()->write('Notification Order validated');
-			die('Presta-v' . $this->module->version . '-OK');
+			$this->module->unlock($response->getOrderId());
+			die('Presta '._PS_VERSION_.' Module ' . $this->module->version . '-OK');
 		}
 
 		if (((int) $existing_order->current_state != 2 || (int) $payment_status == 7) && (int) $existing_order->current_state != (int) $original_new_state)
@@ -144,7 +147,8 @@ class EasyTransacNotificationModuleFrontController extends ModuleFrontController
 		}
 		EasyTransac\Core\Logger::getInstance()->write('Notification End of Script');
 		$this->module->unlock($response->getOrderId());
-		die('Presta-v' . $this->module->version . '-OK');
+		EasyTransac\Core\Logger::getInstance()->write('Notification unlocked : ' . $response->getOrderId());
+		die('Presta '._PS_VERSION_.' Module ' . $this->module->version . '-OK');
 	}
 
 }
