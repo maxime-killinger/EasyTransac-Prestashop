@@ -49,6 +49,25 @@ class EasyTransacPaymentModuleFrontController extends ModuleFrontController
 				->setVersion($this->module->get_server_info_string())
 				->setLanguage($langcode);
 
+		// Cart description.
+		if ($cart && ($products = $cart->getProducts()) && is_array($products))
+		{
+			$description = array();
+			foreach ($products as $product)
+			{
+				if (isset($product['name']) && isset($product['cart_quantity']))
+				{
+					$description[] = $product['cart_quantity'] . 'x ' . $product['name'];
+				}
+			}
+			if ($description)
+			{
+				$raw_text = implode(',', $description);
+				$description_text = strlen($raw_text) > 255 ? substr($raw_text, 255) . '...' : $raw_text;
+				$transaction->setDescription($description_text);
+			}
+		}
+
 		$request = new EasyTransac\Requests\PaymentPage();
 
 		/* @var  $response \EasyTransac\Entities\PaymentPageInfos */
@@ -61,8 +80,8 @@ class EasyTransacPaymentModuleFrontController extends ModuleFrontController
 			EasyTransac\Core\Logger::getInstance()->write('Payment Exception: ' . $exc->getMessage());
 		}
 
-		
-		if(!$response->isSuccess())
+
+		if (!$response->isSuccess())
 		{
 			EasyTransac\Core\Logger::getInstance()->write('Payment Page Request error: ' . $response->getErrorCode() . ' - ' . $response->getErrorMessage());
 		}
@@ -79,7 +98,7 @@ class EasyTransacPaymentModuleFrontController extends ModuleFrontController
 		));
 
 		$this->module->create_easytransac_order_state();
-		
+
 		$this->setTemplate('payment_execution.tpl');
 	}
 
