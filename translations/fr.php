@@ -51,6 +51,7 @@ $_MODULE['<{easytransac}default-bootstrap>confirmation_443ba7035e96aec889ff125c0
 $_MODULE['<{easytransac}default-bootstrap>confirmation_2e2117b7c81aa9ea6931641ea2c6499f'] = 'Votre commande sur';
 $_MODULE['<{easytransac}default-bootstrap>confirmation_ecaa952cb16a3aa256995cee0ccdee54'] = 'est en cours de validation.';
 $_MODULE['<{easytransac}default-bootstrap>confirmation_50918aa8e5ee2c48f236547845cc4394'] = 'Veuillez patienter, paiement en cours...';
+$_MODULE['<{easytransac}default-bootstrap>confirmation_f403ac95a07ddae169d88c4833ace3ce'] = 'Merci pour votre commande!';
 
 $_MODULE['<{easytransac}default-bootstrap>spinner_644818852b4dd8cf9da73543e30f045a'] = 'Retour au paiement';
 $_MODULE['<{easytransac}default-bootstrap>spinner_6ff063fbc860a79759a7369ac32cee22'] = 'Paiement';

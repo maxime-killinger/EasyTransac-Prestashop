@@ -1,6 +1,6 @@
 <p>
 	{if $isAccepted}
-		{l s='You have chosen the EasyTransac method.' mod='easytransac'}
+		{l s='Thank you for your order!' mod='easytransac'}
 	
 		<br /><br /><span class="bold">{l s='Your order will be sent very soon.' mod='easytransac'}</span>
 		<br /><br />{l s='For any questions or for further information, please contact our' mod='easytransac'}
