@@ -2,7 +2,7 @@
 <module>
 	<name>easytransac</name>
 	<displayName><![CDATA[EasyTransac]]></displayName>
-	<version><![CDATA[2.1]]></version>
+	<version><![CDATA[2.2]]></version>
 	<description><![CDATA[Service de paiement en ligne]]></description>
 	<author><![CDATA[EasyTransac]]></author>
 	<tab><![CDATA[payments_gateways]]></tab>

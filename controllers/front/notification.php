@@ -23,6 +23,7 @@ class EasyTransacNotificationModuleFrontController extends ModuleFrontController
 		}
 		catch (Exception $exc)
 		{
+			EasyTransac\Core\Logger::getInstance()->write('Notification error : ' . $exc->getMessage());
 			error_log('EasyTransac error: ' . $exc->getMessage());
 			die;
 		}

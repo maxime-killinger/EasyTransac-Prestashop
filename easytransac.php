@@ -16,7 +16,7 @@ class EasyTransac extends PaymentModule
 	{
 		$this->name = 'easytransac';
 		$this->tab = 'payments_gateways';
-		$this->version = '2.1';
+		$this->version = '2.2';
 		$this->author = 'EasyTransac';
 		$this->is_eu_compatible = 1;
 		$this->need_instance = 0;
@@ -49,6 +49,7 @@ class EasyTransac extends PaymentModule
 		if (!parent::install() || !$this->registerHook('payment') || !$this->registerHook('paymentReturn'))
 			return false;
 		include_once(_PS_MODULE_DIR_ . $this->name . '/easytransac_install.php');
+		unlink(_PS_CACHE_DIR_ . 'class_index.php');
 		$easytransac_install = new EasyTransacInstall();
 		$easytransac_install->updateConfiguration();
 		$easytransac_install->createTables();
@@ -67,6 +68,7 @@ class EasyTransac extends PaymentModule
 		include_once(_PS_MODULE_DIR_ . $this->name . '/easytransac_install.php');
 		$easytransac_install = new EasyTransacInstall();
 		$easytransac_install->deleteConfiguration();
+		$easytransac_install->deleteTables();
 		return true;
 	}
 
@@ -105,6 +107,16 @@ class EasyTransac extends PaymentModule
 			else
 			{
 				Configuration::updateValue('EASYTRANSAC_DEBUG', 1);
+			}
+			
+			$enable_oneclick = strval(Tools::getValue('EASYTRANSAC_ONECLICK'));
+			if (empty($enable_oneclick))
+			{
+				Configuration::updateValue('EASYTRANSAC_ONECLICK', 0);
+			}
+			else
+			{
+				Configuration::updateValue('EASYTRANSAC_ONECLICK', 1);
 			}
 			$output .= $this->displayConfirmation($this->l('Settings updated'));
 		}
@@ -164,6 +176,25 @@ class EasyTransac extends PaymentModule
 						),
 						array(
 							'id' => 'active_off',
+							'value' => 0,
+							'label' => $this->l('Disabled')
+						)
+					),
+				),
+				array(
+					'type' => 'radio',
+					'label' => 'One Click Payment',
+					'name' => 'EASYTRANSAC_ONECLICK',
+					'size' => 20,
+					'is_bool' => true,
+					'values' => array(// $values contains the data itself.
+						array(
+							'id' => 'active2_on', // The content of the 'id' attribute of the <input> tag, and of the 'for' attribute for the <label> tag.
+							'value' => 1, // The content of the 'value' attribute of the <input> tag.   
+							'label' => $this->l('Enabled')   // The <label> for this radio button.
+						),
+						array(
+							'id' => 'active2_off',
 							'value' => 0,
 							'label' => $this->l('Disabled')
 						)
@@ -254,6 +285,7 @@ class EasyTransac extends PaymentModule
 		);
 
 		// Load current value
+		$helper->fields_value['EASYTRANSAC_ONECLICK'] = Configuration::get('EASYTRANSAC_ONECLICK');
 		$helper->fields_value['EASYTRANSAC_DEBUG'] = Configuration::get('EASYTRANSAC_DEBUG');
 		$helper->fields_value['EASYTRANSAC_API_KEY'] = Configuration::get('EASYTRANSAC_API_KEY');
 		$helper->fields_value['EASYTRANSAC_3DSECURE'] = Configuration::get('EASYTRANSAC_3DSECURE');

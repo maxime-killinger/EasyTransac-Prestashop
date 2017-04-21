@@ -13,6 +13,10 @@ class EasyTransacListcardsModuleFrontController extends ModuleFrontController
 	{
 		if (!$this->context->customer->id)
 			die;
+		
+		if(!Configuration::get('EASYTRANSAC_ONECLICK'))
+			die(json_encode(array('status' => 0)));
+		
 		$this->module->loginit();
 		EasyTransac\Core\Services::getInstance()->provideAPIKey(Configuration::get('EASYTRANSAC_API_KEY'));
 		$customer = (new EasyTransac\Entities\Customer())->setClientId($this->context->customer->getClient_id());
@@ -35,7 +39,7 @@ class EasyTransacListcardsModuleFrontController extends ModuleFrontController
 		{
 			EasyTransac\Core\Logger::getInstance()->write('List Cards Error: ' . $response->getErrorCode() . ' - ' . $response->getErrorMessage());
 		}
-		echo json_encode(array('status' => 0));
+		die(json_encode(array('status' => 0)));
 	}
 
 }

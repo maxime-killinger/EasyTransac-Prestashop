@@ -15,6 +15,8 @@ class EasyTransacInstall
 	{
 		Configuration::updateValue('EASYTRANSAC_API_KEY', 0);
 		Configuration::updateValue('EASYTRANSAC_3DSECURE_ONLY', 1);
+		Configuration::updateValue('EASYTRANSAC_DEBUG', 0);
+		Configuration::updateValue('EASYTRANSAC_ONECLICK', 0);
 	}
 	
 	/**
@@ -41,4 +43,12 @@ class EasyTransacInstall
             return false;
         }
     }
+	
+	/**
+	 * Delete EasyTransac table
+	 */
+	public function deleteTables()
+	{
+		Db::getInstance()->Execute('DROP TABLE IF EXISTS `'._DB_PREFIX_.'easytransac_customer`;');
+	}
 }
