@@ -1,33 +1,20 @@
 
-{if $smarty.const._PS_VERSION_ >= 1.6}
+<div class="row">
+    <div class="col-xs-12 col-md-6">
+        <p class="payment_module easytransac">
+            {l s='Pay with EasyTransac' mod='easytransac'}
 
-	<div class="row">
-		<div class="col-xs-12 col-md-6">
-			<p class="payment_module easytransac">
-				<a href="{$link->getModuleLink('easytransac', 'payment')|escape:'html'}" title="{l s='Pay with EasyTransac' mod='easytransac'}">
-					<img src="{$base_dir_ssl|escape:'htmlall':'UTF-8'}modules/easytransac/views/img/icon.jpg" />
-					{l s='Pay with EasyTransac' mod='easytransac'}
-                                        
-				</a>
-			</p>
-                        <div id="easytransac-namespace" style="margin-left: 20px;height:100px;">
-                        </div>
-                        <script type="text/javascript" src="{$base_dir_ssl|escape:'htmlall':'UTF-8'}modules/easytransac/views/js/oneclick.js"></script>
-		</div>
-	</div>
+        </p>
+        <div id="easytransac-namespace" style="margin-left: 20px;height:100px;">
+        </div>
+        <script type="text/javascript" src="{if isset($force_ssl) && $force_ssl}{$base_dir_ssl}{else}{$base_dir}{/if}/modules/easytransac/views/js/oneclick.js"></script>
+    </div>
+</div>
 
-{else}
-	<p class="payment_module easytransac">
-		<a href="{$link->getModuleLink('easytransac', 'payment')|escape:'html'}" title="{l s='Pay with EasyTransac' mod='easytransac'}">
-			<img src="{$base_dir_ssl}modules/easytransac/views/img/icon.jpg" />
-			{l s='Pay with EasyTransac' mod='easytransac'}
-		</a>
-	</p>
-{/if}
 
 <style>
-	p.payment_module.easytransac a 
-	{ldelim}
-	padding-left:17px;
-	{rdelim}
+    p.payment_module.easytransac a 
+    {ldelim}
+    padding-left:17px;
+    {rdelim}
 </style>

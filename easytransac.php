@@ -6,6 +6,8 @@ require __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autolo
  * EasyTransac's official payment method Prestashop module.
  */
 
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+
 if (!defined('_PS_VERSION_'))
 	exit;
 
@@ -16,12 +18,15 @@ class EasyTransac extends PaymentModule
 	{
 		$this->name = 'easytransac';
 		$this->tab = 'payments_gateways';
-		$this->version = '2.2';
+		$this->version = '3.0.0';
 		$this->author = 'EasyTransac';
 		$this->is_eu_compatible = 1;
 		$this->need_instance = 0;
-		$this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+		$this->ps_versions_compliancy = array('min' => '1.7', 'max' => _PS_VERSION_);
 		$this->bootstrap = true;
+
+		$this->currencies = true;
+		$this->currencies_mode = 'checkbox';
 
 		parent::__construct();
 
@@ -33,7 +38,7 @@ class EasyTransac extends PaymentModule
 		if (!Configuration::get('EASYTRANSAC_API_KEY'))
 			$this->warning = $this->l('No API key provided');
 	}
-	
+
 	public function loginit()
 	{
 		EasyTransac\Core\Logger::getInstance()->setActive(Configuration::get('EASYTRANSAC_DEBUG'));
@@ -46,7 +51,7 @@ class EasyTransac extends PaymentModule
 	 */
 	public function install()
 	{
-		if (!parent::install() || !$this->registerHook('payment') || !$this->registerHook('paymentReturn'))
+		if (!parent::install() || !$this->registerHook('paymentOptions') || !$this->registerHook('paymentReturn'))
 			return false;
 		include_once(_PS_MODULE_DIR_ . $this->name . '/easytransac_install.php');
 		unlink(_PS_CACHE_DIR_ . 'class_index.php');
@@ -96,7 +101,7 @@ class EasyTransac extends PaymentModule
 			{
 				Configuration::updateValue('EASYTRANSAC_3DSECURE', 1);
 			}
-			
+
 			$enable_debug = strval(Tools::getValue('EASYTRANSAC_DEBUG'));
 			if (empty($enable_debug))
 			{
@@ -108,7 +113,7 @@ class EasyTransac extends PaymentModule
 			{
 				Configuration::updateValue('EASYTRANSAC_DEBUG', 1);
 			}
-			
+
 			$enable_oneclick = strval(Tools::getValue('EASYTRANSAC_ONECLICK'));
 			if (empty($enable_oneclick))
 			{
@@ -171,7 +176,7 @@ class EasyTransac extends PaymentModule
 					'values' => array(// $values contains the data itself.
 						array(
 							'id' => 'active_on', // The content of the 'id' attribute of the <input> tag, and of the 'for' attribute for the <label> tag.
-							'value' => 1, // The content of the 'value' attribute of the <input> tag.   
+							'value' => 1, // The content of the 'value' attribute of the <input> tag.
 							'label' => $this->l('Enabled')	  // The <label> for this radio button.
 						),
 						array(
@@ -190,7 +195,7 @@ class EasyTransac extends PaymentModule
 					'values' => array(// $values contains the data itself.
 						array(
 							'id' => 'active2_on', // The content of the 'id' attribute of the <input> tag, and of the 'for' attribute for the <label> tag.
-							'value' => 1, // The content of the 'value' attribute of the <input> tag.   
+							'value' => 1, // The content of the 'value' attribute of the <input> tag.
 							'label' => $this->l('Enabled')   // The <label> for this radio button.
 						),
 						array(
@@ -209,7 +214,7 @@ class EasyTransac extends PaymentModule
 					'values' => array(// $values contains the data itself.
 						array(
 							'id' => 'active2_on', // The content of the 'id' attribute of the <input> tag, and of the 'for' attribute for the <label> tag.
-							'value' => 1, // The content of the 'value' attribute of the <input> tag.   
+							'value' => 1, // The content of the 'value' attribute of the <input> tag.
 							'label' => $this->l('Enabled')   // The <label> for this radio button.
 						),
 						array(
@@ -298,34 +303,19 @@ class EasyTransac extends PaymentModule
 	/**
 	 * Payment method choice.
 	 */
-	public function hookPayment($params)
+	public function hookPaymentOptions($params)
 	{
 		if (!$this->active)
-			return;
-
-		return $this->fetchTemplate('checkout_payment.tpl');
-	}
-
-	/**
-	 * Helper function to fetch a template.
-	 */
-	public function fetchTemplate($name)
-	{
-		if (version_compare(_PS_VERSION_, '1.4', '<'))
-			$this->context->smarty->currentTemplate = $name;
-		elseif (version_compare(_PS_VERSION_, '1.5', '<'))
 		{
-			$views = 'views/templates/';
-			if (@filemtime(dirname(__FILE__) . '/' . $name))
-				return $this->display(__FILE__, $name);
-			elseif (@filemtime(dirname(__FILE__) . '/' . $views . 'hook/' . $name))
-				return $this->display(__FILE__, $views . 'hook/' . $name);
-			elseif (@filemtime(dirname(__FILE__) . '/' . $views . 'front/' . $name))
-				return $this->display(__FILE__, $views . 'front/' . $name);
-			elseif (@filemtime(dirname(__FILE__) . '/' . $views . 'admin/' . $name))
-				return $this->display(__FILE__, $views . 'admin/' . $name);
+			return;
 		}
-		return $this->display(__FILE__, $name);
+		$newOption	 = new PaymentOption();
+		$paymentForm	 = $this->fetch('module:easytransac/views/templates/hook/checkout_payment.tpl');
+		$newOption->setCallToActionText($this->trans('Pay by EasyTransac', array(), 'Modules.EasyTransac.Shop'))
+			->setForm($paymentForm)
+			->setLogo(_MODULE_DIR_ . 'easytransac/logo.png')
+			->setAction($this->context->link->getModuleLink($this->name, 'payment'));
+		return [$newOption];
 	}
 
 	/**
@@ -351,7 +341,7 @@ class EasyTransac extends PaymentModule
 			'isAccepted' => (int) $existing_order->current_state === 2,
 		));
 
-		return $this->fetchTemplate('confirmation.tpl');
+		return $this->fetch('module:easytransac/views/templates/hook/confirmation.tpl');
 	}
 
 	/**
