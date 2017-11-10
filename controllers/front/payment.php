@@ -43,7 +43,7 @@ class EasyTransacPaymentModuleFrontController extends ModuleFrontController
 				->setAmount($total)
 				->setCustomer($customer_ET)
 				->setOrderId($this->context->cart->id)
-				->setReturnUrl(Tools::getShopDomainSsl(true, true) . '/module/easytransac/validation')
+				->setReturnUrl(Tools::getShopDomainSsl(true, true) . __PS_BASE_URI__ . 'module/easytransac/validation')
 				->setCancelUrl(Tools::getShopDomainSsl(true, true) . __PS_BASE_URI__ . 'index.php?controller=order&step=3')
 				->setSecure(Configuration::get('EASYTRANSAC_3DSECURE') ? 'yes' : 'no')
 				->setVersion($this->module->get_server_info_string())
