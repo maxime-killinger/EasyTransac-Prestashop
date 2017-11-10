@@ -1,2 +1,2 @@
 # EasyTransac-Prestashop
-EasyTransac payment gateway module for Prestashop v1.6
+EasyTransac update payment gateway module for Prestashop v1.7
