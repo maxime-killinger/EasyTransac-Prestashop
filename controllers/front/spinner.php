@@ -29,7 +29,7 @@ class EasyTransacSpinnerModuleFrontController extends ModuleFrontController
 			return;
 		}
 
-		$this->setTemplate('spinner.tpl');
+		$this->setTemplate('module:easytransac/views/templates/front/spinner.tpl');	
 	}
 
 	public function postProcess()

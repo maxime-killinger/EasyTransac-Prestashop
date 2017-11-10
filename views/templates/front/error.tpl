@@ -1,6 +1,6 @@
 
 {capture name=path}<a href="order.php">{l s='Your shopping cart' mod='easytransac'}</a><span class="navigation-pipe"> {$navigationPipe|escape:'htmlall':'UTF-8'} </span> {l s='EasyTransac' mod='easytransac'}{/capture}
-	{include file="$tpl_dir./breadcrumb.tpl"}
+
 
 <h2>{$message|escape:'htmlall':'UTF-8'}</h2>
 {if isset($logs) && $logs}
@@ -15,7 +15,7 @@
 
 		<br>	
 
-		<p><a href="{$base_dir}" class="button_small" title="{l s='Back' mod='easytransac'}">&laquo; {l s='Back' mod='easytransac'}</a></p>
+		<p><a href="/" class="button_small" title="{l s='Back' mod='easytransac'}">&laquo; {l s='Back' mod='easytransac'}</a></p>
 	</div>
 
 {/if}
