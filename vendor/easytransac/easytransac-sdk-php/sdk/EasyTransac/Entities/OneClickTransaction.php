@@ -29,6 +29,8 @@ class OneClickTransaction extends Entity
     protected $language = null;
     /** @map:ClientId **/
     protected $clientId = null;
+    /** @map:Version **/
+    protected $version = null;
 
     public function __construct()
     {
@@ -37,7 +39,8 @@ class OneClickTransaction extends Entity
     	if (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']))
     		$this->setClientIp($_SERVER['REMOTE_ADDR']);
     	
-    	$this->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+    	if (isset($_SERVER['HTTP_USER_AGENT']) && !empty($_SERVER['HTTP_USER_AGENT']))
+    		$this->setUserAgent($_SERVER['HTTP_USER_AGENT']);
     }
     
     public function setAlias($value)
@@ -150,6 +153,15 @@ class OneClickTransaction extends Entity
 		return $this;
 	}
 	
+	function getVersion()
+	{
+		return $this->version;
+	}
+
+	function setVersion($version)
+	{
+		$this->version = $version;
+	}
 }
 
 ?>

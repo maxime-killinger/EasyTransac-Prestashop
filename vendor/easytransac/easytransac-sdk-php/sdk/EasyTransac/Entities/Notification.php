@@ -46,19 +46,7 @@ class Notification extends Entity
 	/** @object:Client **/
 	protected $client = null;
 	/** @map:Error **/
-    protected $error = null;
-    /** @map:AdditionalError **/
-    protected $additionalError = null;
-	
-    public function getAdditionalError()
-    {
-        return $this->additionalError;
-    }
-	
-	public function getError()
-    {
-        return $this->error;
-    }
+	protected $error = null;
 	
 	public function getOperationType() 
 	{
@@ -255,6 +243,17 @@ class Notification extends Entity
 	public function setClient(Client $client) 
 	{
 		$this->client = $client;
+		return $this;
+	}
+
+	public function getError() 
+	{
+		return $this->error;
+	}
+	
+	public function setError($error) 
+	{
+		$this->error = $error;
 		return $this;
 	}
 }

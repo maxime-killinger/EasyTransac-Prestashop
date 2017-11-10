@@ -13,7 +13,7 @@ class PaymentPageTransaction extends Entity
     protected $sendEmail = null;
     /** @map:OrderId **/
     protected $orderId = null;
-    /** @map:description **/
+    /** @map:Description **/
     protected $description = null;
     /** @map:Amount **/
     protected $amount = null;
@@ -53,7 +53,8 @@ class PaymentPageTransaction extends Entity
     	if (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']))
     		$this->setClientIp($_SERVER['REMOTE_ADDR']);
     	
-    	$this->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+    	if (isset($_SERVER['HTTP_USER_AGENT']) && !empty($_SERVER['HTTP_USER_AGENT']))
+    		$this->setUserAgent($_SERVER['HTTP_USER_AGENT']);
     }
     
     public function getSendEmail()
