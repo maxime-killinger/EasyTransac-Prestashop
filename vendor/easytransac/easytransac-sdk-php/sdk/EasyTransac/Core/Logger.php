@@ -23,10 +23,6 @@ class Logger
 		
 	}
 	
-	/**
-	 * 
-	 * @return Logger
-	 */
 	public static function getInstance()
 	{
 		if (self::$instance == null)

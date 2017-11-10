@@ -9,16 +9,16 @@
     "packages": [
         {
             "name": "easytransac/easytransac-sdk-php",
-            "version": "1.0.6",
+            "version": "1.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/easytransac/easytransac-sdk-php.git",
-                "reference": "a32048003793c235875f4a9e744b6177cd550e18"
+                "reference": "b537ff1bec3f8b8ae7658f9fe2eddd43484cab9d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/easytransac/easytransac-sdk-php/zipball/a32048003793c235875f4a9e744b6177cd550e18",
-                "reference": "a32048003793c235875f4a9e744b6177cd550e18",
+                "url": "https://api.github.com/repos/easytransac/easytransac-sdk-php/zipball/b537ff1bec3f8b8ae7658f9fe2eddd43484cab9d",
+                "reference": "b537ff1bec3f8b8ae7658f9fe2eddd43484cab9d",
                 "shasum": ""
             },
             "require": {
@@ -32,7 +32,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "description": "A SDK to make payment with the EasyTransac API",
-            "time": "2017-01-19 17:14:14"
+            "time": "2017-11-10 10:08:01"
         }
     ],
     "packages-dev": [],
