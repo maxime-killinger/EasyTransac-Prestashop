@@ -62,3 +62,6 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+vendor/easytransac/easytransac-sdk-php/docs/*
+vendor/easytransac/easytransac-sdk-php/samples/*
+vendor/easytransac/easytransac-sdk-php/tests/*
