@@ -35,7 +35,7 @@ class PaymentNotification
 			Logger::getInstance()->write('Used api key: '.$apiKey);
 			throw new \RuntimeException('The signature is incorrect', 12);
 		}
-		
+    
 		return $notif;
 	}
 	
